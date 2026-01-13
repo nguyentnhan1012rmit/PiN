@@ -1,16 +1,72 @@
-# React + Vite
+# LensLocker 📸
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+LensLocker is a premium platform connecting professional photographers with clients who need them. It features a modern, high-performance interface with social networking capabilities, portfolio browsing, and secure booking management.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Modern SaaS UI**: A clean, fullscreen, borderless design influenced by top-tier modern web applications.
+- **Social Feed**: A community space for users to post requests and photographers to interact (Like, Comment, Reply).
+- **Pro Discovery**: Browse verified photographer portfolios with rich visuals.
+- **Authentication**: Secure role-based access (Customer/Photographer) powered by Supabase Auth.
+- **Dark Mode**: A dedicated, professionally curated dark theme using deep indigo and violet tones.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [DaisyUI](https://daisyui.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Backend & Auth**: [Supabase](https://supabase.com/)
+- **State/Query**: [TanStack Query](https://tanstack.com/query/latest)
+- **Routing**: [React Router](https://reactrouter.com/)
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- Node.js (v18 or higher)
+- A Supabase project
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/yourusername/lenslocker.git
+    cd lenslocker
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Environment Setup:**
+    Create a `.env` file in the root directory and add your Supabase credentials:
+    ```env
+    VITE_SUPABASE_URL=your_supabase_project_url
+    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
+
+4.  **Database Setup:**
+    Run the SQL scripts provided in the root directory in your Supabase SQL Editor in this order:
+    1.  `supabase_schema.sql` (Base tables, Profiles, RLS)
+    2.  `social_features.sql` (Posts, Comments, Likes)
+    3.  `fix_relationships.sql` (Fixes for foreign key joins)
+
+5.  **Run the application:**
+    ```bash
+    npm run dev
+    ```
+
+## 📂 Project Structure
+
+- `src/pages`: Main application views (Home, Feed, Login, etc.)
+- `src/components`: Reusable UI components (PostCard, Navbar, CreatePost)
+- `src/lib`: Database and utility clients
+- `src/contexts`: Global state providers (AuthContext)
+
+## 🎨 Design System
+
+The project uses a custom Tailwind theme configuration defined in `tailwind.config.js`, focusing on a primary `indigo-500` and secondary `violet-500` palette against a dark base.
+
+---
+Built with ❤️ using React & Supabase.
