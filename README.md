@@ -1,6 +1,6 @@
-# LensLocker 📸
+# PiN 📸
 
-LensLocker is a premium platform connecting professional photographers with clients who need them. It features a modern, high-performance interface with social networking capabilities, portfolio browsing, and secure booking management.
+PiN (Photographer is Nearby) is a premium platform connecting professional photographers with clients who need them. It features a modern, high-performance interface with social networking capabilities, portfolio browsing, and secure booking management.
 
 ## ✨ Features
 
@@ -30,8 +30,8 @@ LensLocker is a premium platform connecting professional photographers with clie
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/lenslocker.git
-    cd lenslocker
+    git clone https://github.com/yourusername/pin.git
+    cd pin
     ```
 
 2.  **Install dependencies:**

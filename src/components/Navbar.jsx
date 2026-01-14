@@ -13,7 +13,7 @@ export default function Navbar() {
     return (
         <div className="sticky top-0 z-50 navbar glass-panel px-6 md:px-12 mb-0 rounded-b-2xl">
             <div className="flex-1">
-                <Link to="/" className="btn btn-ghost text-2xl font-bold tracking-tight text-primary">LensLocker</Link>
+                <Link to="/" className="btn btn-ghost text-3xl font-black tracking-tighter text-primary">PiN</Link>
 
                 <div className="hidden md:flex gap-4 ml-4">
                     <Link to="/feed" className="btn btn-ghost btn-sm">Community Feed</Link>
