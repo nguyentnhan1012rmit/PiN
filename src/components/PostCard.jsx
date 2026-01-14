@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Send, Edit2 } fro
 import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
+import CommentItem from './CommentItem'
 
 export default function PostCard({ post, onDelete }) {
     const { user } = useAuth()
@@ -59,42 +60,102 @@ export default function PostCard({ post, onDelete }) {
         }
     }
 
+    const buildCommentTree = (flatComments) => {
+        const commentMap = {}
+        const roots = []
+
+        // First pass: create map
+        flatComments.forEach(c => {
+            commentMap[c.id] = { ...c, children: [] }
+        })
+
+        // Second pass: link children to parents
+        flatComments.forEach(c => {
+            if (c.parent_id) {
+                if (commentMap[c.parent_id]) {
+                    commentMap[c.parent_id].children.push(commentMap[c.id])
+                }
+            } else {
+                roots.push(commentMap[c.id])
+            }
+        })
+        return roots
+    }
+
     const toggleComments = async () => {
         if (!showComments) {
             setLoadingComments(true)
             setShowComments(true)
-            const { data } = await supabase
-                .from('comments')
-                .select('*, profiles(full_name, avatar_url)')
-                .eq('post_id', post.id)
-                .order('created_at', { ascending: true })
-            setComments(data || [])
+            await fetchComments()
             setLoadingComments(false)
         } else {
             setShowComments(false)
         }
     }
 
+    const fetchComments = async () => {
+        const { data } = await supabase
+            .from('comments')
+            .select('*, profiles(full_name, avatar_url)')
+            .eq('post_id', post.id)
+            .order('created_at', { ascending: true })
+        setComments(buildCommentTree(data || []))
+    }
+
     const handleAddComment = async (e) => {
         e.preventDefault()
         if (!newComment.trim()) return
+        await handleReply(null, newComment)
+        setNewComment('')
+    }
 
-        const { data, error } = await supabase
+    const handleReply = async (parentId, content) => {
+        if (!user) {
+            toast.error('Please login to reply')
+            return
+        }
+
+        const { error } = await supabase
             .from('comments')
             .insert({
                 post_id: post.id,
                 user_id: user.id,
-                content: newComment
+                parent_id: parentId,
+                content: content
             })
-            .select('*, profiles(full_name, avatar_url)')
-            .single()
 
         if (error) {
             toast.error('Failed to comment')
         } else {
-            setComments(prev => [...prev, data]) // Note: usually requires another fetch or precise mock, but select single works if relation set up
-            setNewComment('')
-            // Optimistically update comment count? The prop `post` won't update automatically though.
+            // Refresh comments
+            await fetchComments()
+            if (!parentId) {
+                // Optimistically update main count if root comment? 
+                // DB trigger handles real count, but we might want local feedback.
+                // For nested replies, they don't change the Post's total comment count usually? 
+                // Ah, our earlier sql trigger updates post comment count on ANY insert to comments table.
+                // So yes, we could increment locally.
+            }
+        }
+    }
+
+    const handleDeleteComment = async (commentId) => {
+        const { error } = await supabase.from('comments').delete().eq('id', commentId)
+        if (error) {
+            toast.error('Failed to delete comment')
+        } else {
+            await fetchComments()
+            toast.success('Comment deleted')
+        }
+    }
+
+    const handleEditComment = async (commentId, content) => {
+        const { error } = await supabase.from('comments').update({ content }).eq('id', commentId)
+        if (error) {
+            toast.error('Failed to update comment')
+        } else {
+            await fetchComments()
+            toast.success('Comment updated')
         }
     }
 
@@ -103,8 +164,14 @@ export default function PostCard({ post, onDelete }) {
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="avatar placeholder">
-                    <div className="bg-primary/20 text-primary rounded-full w-12 text-lg font-bold">
-                        <span>{post.profiles?.full_name?.charAt(0) || 'U'}</span>
+                    <div className="w-12 h-12 rounded-full overflow-hidden">
+                        {post.profiles?.avatar_url ? (
+                            <img src={post.profiles.avatar_url} className="avatar-img" alt={post.profiles.full_name} />
+                        ) : (
+                            <div className="avatar-placeholder-bg text-lg">
+                                <span>{post.profiles?.full_name?.charAt(0) || 'U'}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="flex-1">
@@ -182,17 +249,13 @@ export default function PostCard({ post, onDelete }) {
                                 <div className="text-center opacity-50 py-2">Loading comments...</div>
                             ) : comments.length > 0 ? (
                                 comments.map(comment => (
-                                    <div key={comment.id} className="flex gap-3">
-                                        <div className="avatar placeholder">
-                                            <div className="bg-neutral-focus text-neutral-content rounded-full w-8 h-8 text-xs">
-                                                <span>{comment.profiles?.full_name?.[0]}</span>
-                                            </div>
-                                        </div>
-                                        <div className="bg-base-200 rounded-2xl p-3 px-4 text-sm">
-                                            <span className="font-bold block text-xs opacity-70 mb-1">{comment.profiles?.full_name}</span>
-                                            {comment.content}
-                                        </div>
-                                    </div>
+                                    <CommentItem
+                                        key={comment.id}
+                                        comment={comment}
+                                        onReply={handleReply}
+                                        onDelete={handleDeleteComment}
+                                        onEdit={handleEditComment}
+                                    />
                                 ))
                             ) : (
                                 <div className="text-sm opacity-50 italic">No comments yet.</div>

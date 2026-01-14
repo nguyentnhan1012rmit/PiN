@@ -11,7 +11,7 @@ export default function Navbar() {
     }
 
     return (
-        <div className="navbar bg-base-100 shadow-sm border-b border-base-200 px-6 md:px-12">
+        <div className="sticky top-0 z-50 navbar glass-panel px-6 md:px-12 mb-0 rounded-b-2xl">
             <div className="flex-1">
                 <Link to="/" className="btn btn-ghost text-2xl font-bold tracking-tight text-primary">LensLocker</Link>
 
