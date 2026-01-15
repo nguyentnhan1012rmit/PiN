@@ -62,7 +62,7 @@ export default function Feed() {
     return (
         <div className="min-h-screen bg-base-100 py-12">
             <div className="w-full max-w-3xl mx-auto px-6">
-                <div className="flex items-center justify-between mb-12 border-b border-base-content/10 pb-6">
+                <div className="flex items-center justify-between mb-12 border-base-content/10 pb-6">
                     <h1 className="text-4xl font-bold tracking-tight">Community Feed</h1>
                 </div>
 

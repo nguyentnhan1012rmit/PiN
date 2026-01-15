@@ -184,7 +184,11 @@ export default function PhotographerDashboard() {
                                 <div className="flex items-center gap-4 w-full md:w-auto">
                                     <div className="avatar placeholder">
                                         <div className="w-12 rounded-full bg-neutral text-neutral-content">
-                                            <span>{booking.customer?.full_name?.[0]}</span>
+                                            {booking.customer?.avatar_url ? (
+                                                <img src={booking.customer.avatar_url} alt={booking.customer.full_name} className="avatar-img" />
+                                            ) : (
+                                                <span>{booking.customer?.full_name?.[0]}</span>
+                                            )}
                                         </div>
                                     </div>
                                     <div>

@@ -150,7 +150,7 @@ function UserItem({ profile, onClick }) {
         >
             <div className="avatar">
                 <div className="w-10 rounded-full">
-                    <img src={profile.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"} alt={profile.full_name} />
+                    <img src={profile.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"} alt={profile.full_name} className="avatar-img" />
                 </div>
             </div>
             <div>

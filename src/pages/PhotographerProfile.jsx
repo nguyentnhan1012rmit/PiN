@@ -305,7 +305,7 @@ export default function PhotographerProfile() {
                                 <img
                                     src={profile.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
                                     alt={profile.full_name}
-                                    className="w-full h-full object-cover"
+                                    className="avatar-img"
                                 />
                             </div>
                         </div>

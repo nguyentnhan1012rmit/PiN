@@ -54,7 +54,7 @@ export default function Photographers() {
                                     <div className="avatar placeholder">
                                         <div className="w-12 rounded-full ring ring-white/20 bg-neutral text-neutral-content">
                                             {p.avatar_url ? (
-                                                <img src={p.avatar_url} alt={p.full_name} />
+                                                <img src={p.avatar_url} alt={p.full_name} className="avatar-img" />
                                             ) : (
                                                 <span className="text-xl font-bold">
                                                     {p.full_name?.charAt(0) || <User />}

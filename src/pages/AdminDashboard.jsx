@@ -112,8 +112,8 @@ export default function AdminDashboard() {
                                 <td>
                                     <div className="flex items-center gap-3">
                                         <div className="avatar">
-                                            <div className="mask mask-squircle w-10 h-10">
-                                                {u.avatar_url ? <img src={u.avatar_url} /> : <div className="bg-neutral w-full h-full"></div>}
+                                            <div className="w-10 h-10 rounded-full">
+                                                {u.avatar_url ? <img src={u.avatar_url} alt={u.full_name} className="avatar-img" /> : <div className="bg-neutral w-full h-full rounded-full"></div>}
                                             </div>
                                         </div>
                                         <div>

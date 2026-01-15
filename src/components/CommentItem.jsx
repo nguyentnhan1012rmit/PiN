@@ -97,17 +97,15 @@ export default function CommentItem({ comment, onReply, onDelete, onEdit, depth 
     }
 
     return (
-        <div className={`mt-4 ${depth > 0 ? 'ml-8 border-l-2 border-base-200 pl-4' : ''}`}>
+        <div className={`mt-4 ${depth > 0 ? 'ml-8 border-l-2 border-base-content/10 pl-4' : ''}`}>
             <div className="flex gap-3 items-start group">
                 <Link to={`/photographer/${comment.user_id}`} className="avatar placeholder pt-1 hover:opacity-80 transition-opacity">
                     <div className="w-8 h-8 rounded-full overflow-hidden">
-                        {comment.profiles?.avatar_url ? (
-                            <img src={comment.profiles.avatar_url} className="avatar-img" alt={comment.profiles.full_name} />
-                        ) : (
-                            <div className="avatar-placeholder-bg text-xs">
-                                <span>{comment.profiles?.full_name?.[0]}</span>
-                            </div>
-                        )}
+                        <img
+                            src={comment.profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
+                            className="avatar-img"
+                            alt={comment.profiles?.full_name || 'User'}
+                        />
                     </div>
                 </Link>
 

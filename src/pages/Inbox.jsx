@@ -242,7 +242,7 @@ export default function Inbox() {
                                                     <img
                                                         src={conv.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
                                                         alt={conv.full_name}
-                                                        className="w-full h-full object-cover"
+                                                        className="avatar-img"
                                                     />
                                                 </div>
                                             </div>

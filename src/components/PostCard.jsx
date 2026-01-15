@@ -161,34 +161,32 @@ export default function PostCard({ post, onDelete }) {
     }
 
     return (
-        <div className="py-6 border-b border-base-200/50 first:pt-0 last:border-0 hover:bg-base-100/40 transition-colors -mx-4 px-4">
+        <div className="card-glass p-6 rounded-2xl mb-6 transition-all hover:shadow-md group">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-4">
-                <Link to={`/photographer/${post.user_id}`} className="avatar placeholder hover:opacity-80 transition-opacity">
-                    <div className="w-12 h-12 rounded-full overflow-hidden">
-                        {post.profiles?.avatar_url ? (
-                            <img src={post.profiles.avatar_url} className="avatar-img" alt={post.profiles.full_name} />
-                        ) : (
-                            <div className="avatar-placeholder-bg text-lg">
-                                <span>{post.profiles?.full_name?.charAt(0) || 'U'}</span>
-                            </div>
-                        )}
+            <div className="flex items-center gap-3 mb-4">
+                <Link to={`/photographer/${post.user_id}`} className="avatar">
+                    <div className="w-10 h-10 rounded-full ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                        <img
+                            src={post.profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
+                            className="avatar-img"
+                            alt={post.profiles?.full_name || 'User'}
+                        />
                     </div>
                 </Link>
-                <div className="flex-1">
-                    <Link to={`/photographer/${post.user_id}`} className="font-bold text-base text-base-content hover:underline">
+                <div className="flex-1 min-w-0">
+                    <Link to={`/photographer/${post.user_id}`} className="font-bold text-base text-base-content hover:text-primary transition-colors block truncate">
                         {post.profiles?.full_name || 'Unknown User'}
                     </Link>
-                    <div className="text-sm text-base-content/50">
-                        {new Date(post.created_at).toLocaleDateString()}
+                    <div className="text-xs text-base-content/50">
+                        {new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
                 </div>
 
                 <div className="dropdown dropdown-end">
-                    <div tabIndex={0} role="button" className="btn btn-ghost btn-xs btn-circle opacity-50">
+                    <div tabIndex={0} role="button" className="btn btn-ghost btn-sm btn-circle opacity-0 group-hover:opacity-100 transition-opacity">
                         <MoreHorizontal size={20} />
                     </div>
-                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
                         {user && user.id === post.user_id ? (
                             <>
                                 <li>
@@ -210,46 +208,73 @@ export default function PostCard({ post, onDelete }) {
             </div>
 
             {/* Content */}
-            <div className="pl-[64px]">
-                <p className="text-lg mb-4 whitespace-pre-wrap leading-relaxed text-base-content/90">{post.content}</p>
+            <div className="">
+                <p className="text-lg mb-4 whitespace-pre-wrap leading-relaxed text-base-content/90 font-light">{post.content}</p>
 
                 {post.image_url && (
-                    <figure className="mb-4 rounded-xl overflow-hidden border border-base-200/20">
-                        <img src={post.image_url} alt="Post content" className="w-full object-cover max-h-[500px]" />
+                    <figure className="mb-4 rounded-xl overflow-hidden border border-base-content/5 shadow-sm">
+                        <img src={post.image_url} alt="Post content" className="w-full object-cover max-h-[600px] hover:scale-[1.01] transition-transform duration-500" />
                     </figure>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-6 pt-2">
+                <div className="flex items-center gap-2 pt-2 border-t border-base-content/5 mt-4">
                     <button
                         onClick={handleLike}
-                        className={`btn btn-ghost btn-sm gap-2 px-0 hover:bg-transparent ${liked ? 'text-red-500' : 'text-base-content/60'}`}
+                        className={`btn btn-sm gap-2 px-3 rounded-full transition-colors ${liked ? 'btn-error btn-soft text-error-content' : 'btn-ghost text-base-content/60 hover:bg-base-200'}`}
                     >
-                        <Heart size={20} fill={liked ? "currentColor" : "none"} />
-                        <span className="text-sm font-medium">{likesCount > 0 ? likesCount : ''}</span>
+                        <Heart size={18} fill={liked ? "currentColor" : "none"} />
+                        <span className="font-medium">{likesCount > 0 ? likesCount : 'Like'}</span>
                     </button>
                     <button
                         onClick={toggleComments}
-                        className="btn btn-ghost btn-sm gap-2 px-0 hover:bg-transparent text-base-content/60"
+                        className={`btn btn-sm gap-2 px-3 rounded-full transition-colors ${showComments ? 'btn-primary btn-soft' : 'btn-ghost text-base-content/60 hover:bg-base-200'}`}
                     >
-                        <MessageCircle size={20} />
-                        <span className="text-sm font-medium">{post.comments_count > 0 ? post.comments_count : ''}</span>
+                        <MessageCircle size={18} />
+                        <span className="font-medium">{post.comments_count > 0 ? post.comments_count : 'Comment'}</span>
                     </button>
                     <button
                         onClick={() => toast('Share feature under development 🛠️', { icon: '🚧' })}
-                        className="btn btn-ghost btn-sm gap-2 px-0 ml-auto hover:bg-transparent text-base-content/60"
+                        className="btn btn-ghost btn-sm gap-2 px-3 ml-auto rounded-full text-base-content/60 hover:bg-base-200"
                     >
-                        <Share2 size={20} />
+                        <Share2 size={18} />
                     </button>
                 </div>
 
                 {/* Comments Section */}
                 {showComments && (
-                    <div className="mt-6 pt-6 border-t border-base-200">
+                    <div className="mt-4 bg-base-200/30 rounded-xl p-4 animate-fade-in border border-base-content/5">
+                        {/* Input */}
+                        <form onSubmit={handleAddComment} className="flex gap-3 items-center mb-6">
+                            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+                                <img
+                                    src={user?.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
+                                    className="avatar-img"
+                                    alt="Me"
+                                />
+                            </div>
+                            <div className="relative flex-1">
+                                <input
+                                    type="text"
+                                    className="input input-bordered input-sm w-full rounded-full pr-10 bg-base-100 focus:bg-base-100 focus:border-primary transition-colors"
+                                    placeholder="Write a comment..."
+                                    value={newComment}
+                                    onChange={e => setNewComment(e.target.value)}
+                                />
+                                <button
+                                    type="submit"
+                                    className="absolute right-1 top-1/2 -translate-y-1/2 btn btn-xs btn-circle btn-primary"
+                                    disabled={!newComment.trim()}
+                                >
+                                    <Send size={12} />
+                                </button>
+                            </div>
+                        </form>
+
                         {/* List */}
-                        <div className="space-y-4 mb-4">
+                        <div className="space-y-4">
                             {loadingComments ? (
-                                <div className="text-center opacity-50 py-2">Loading comments...</div>
+                                <div className="text-center opacity-50 py-4 text-sm">Loading comments...</div>
                             ) : comments.length > 0 ? (
                                 comments.map(comment => (
                                     <CommentItem
@@ -261,23 +286,9 @@ export default function PostCard({ post, onDelete }) {
                                     />
                                 ))
                             ) : (
-                                <div className="text-sm opacity-50 italic">No comments yet.</div>
+                                <div className="text-center py-4 text-sm opacity-50 italic">No comments yet. Be the first to say something!</div>
                             )}
                         </div>
-
-                        {/* Input */}
-                        <form onSubmit={handleAddComment} className="flex gap-2 items-center">
-                            <input
-                                type="text"
-                                className="input input-bordered input-sm w-full rounded-full"
-                                placeholder="Write a comment..."
-                                value={newComment}
-                                onChange={e => setNewComment(e.target.value)}
-                            />
-                            <button type="submit" className="btn btn-sm btn-circle btn-primary" disabled={!newComment.trim()}>
-                                <Send size={14} />
-                            </button>
-                        </form>
                     </div>
                 )}
             </div>

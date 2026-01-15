@@ -153,7 +153,7 @@ export default function ChatWindow({ recipientId, recipientName, recipientAvatar
                         <img
                             src={recipientAvatar || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
                             alt={recipientName}
-                            className="w-full h-full object-cover"
+                            className="avatar-img"
                         />
                     </div>
                 </div>

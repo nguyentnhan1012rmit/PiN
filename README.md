@@ -5,8 +5,12 @@ PiN (Photographer is Nearby) is a premium platform connecting professional photo
 ## ✨ Features
 
 - **Modern SaaS UI**: A clean, fullscreen, borderless design influenced by top-tier modern web applications.
-- **Social Feed**: A community space for users to post requests and photographers to interact (Like, Comment, Reply).
-- **Pro Discovery**: Browse verified photographer portfolios with rich visuals.
+- **Social Feed**: A community space for users to post requests, share photos, and interact (Like, Comment, Reply).
+- **Pro Discovery**: Browse verified photographer portfolios with rich visuals and filtering.
+- **Real-time Messaging**: Integrated chat system allowing clients and photographers to communicate instantly.
+- **Booking System**: Complete booking flow from request to completion, with status tracking (Pending, Confirmed, Completed).
+- **Portfolio Management**: dedicated dashboard for photographers to manage their services, pricing, and photo galleries.
+- **Secure Payments**: Integrated payment UI (mockup ready) for secure transactions.
 - **Authentication**: Secure role-based access (Customer/Photographer) powered by Supabase Auth.
 - **Dark Mode**: A dedicated, professionally curated dark theme using deep indigo and violet tones.
 
@@ -47,14 +51,14 @@ PiN (Photographer is Nearby) is a premium platform connecting professional photo
     ```
 
 4.  **Database Setup:**
-    Run the SQL scripts provided in the root directory in your Supabase SQL Editor in this order:
-    1.  `database/supabase_schema.sql` (Base tables, Profiles, RLS)
-    2.  `database/social_features.sql` (Posts, Comments, Likes)
-    3.  `database/fix_relationships.sql` (Fixes for foreign key joins)
-    4.  `database/reviews.sql` (Reviews & Ratings)
-    5.  `database/chat.sql` (Real-time Messaging)
-    6.  `database/admin.sql` (Admin Roles & Permissions)
-    7.  `database/availability.sql` (Availability System)
+    Run the SQL scripts provided in the `database` folder in your Supabase SQL Editor in this order:
+    1.  `supabase_schema.sql` (Base tables, Profiles, RLS)
+    2.  `social_features.sql` (Posts, Comments, Likes)
+    3.  `fix_relationships.sql` (Fixes for foreign key joins)
+    4.  `reviews.sql` (Reviews & Ratings)
+    5.  `chat.sql` (Real-time Messaging)
+    6.  `admin.sql` (Admin Roles & Permissions)
+    7.  `availability.sql` (Availability System)
 
 5.  **Run the application:**
     ```bash
@@ -74,14 +78,22 @@ To enable the Super Admin dashboard:
 
 ## 📂 Project Structure
 
-- `src/pages`: Main application views (Home, Feed, Login, etc.)
-- `src/components`: Reusable UI components (PostCard, Navbar, CreatePost)
-- `src/lib`: Database and utility clients
-- `src/contexts`: Global state providers (AuthContext)
+- `src/pages`:
+  - `Home.jsx`, `Feed.jsx`: Core public/community pages.
+  - `Photographers.jsx`, `PhotographerProfile.jsx`: Discovery and profile viewing.
+  - `PhotographerDashboard.jsx`, `MyBookings.jsx`: User-specific dashboards.
+  - `Inbox.jsx`: Real-time chat interface.
+  - `AdminDashboard.jsx`: Super admin controls.
+- `src/components`: Reusable UI components including `Navbar`, `PostCard`, `ChatWindow`, etc.
+- `src/lib`: Supabase client configuration.
+- `src/contexts`: Global state providers (`AuthContext`).
 
 ## 🎨 Design System
 
-The project uses a custom Tailwind theme configuration defined in `tailwind.config.js`, focusing on a primary `indigo-500` and secondary `violet-500` palette against a dark base.
+The project uses a custom Tailwind theme configuration defined in `tailwind.config.js`, focusing on a primary `indigo-500` and secondary `violet-500` palette against a dark base. Consistently applied styles include:
+- **Glassmorphism**: `.glass-panel` and `.card-glass` utilities.
+- **Avatars**: Standardized `.avatar-img` class for consistent rounding and borders.
+- **Animations**: Subtle entry animations (`animate-appear`, `animate-fade-in`).
 
 ---
 Built with ❤️ using React & Supabase.

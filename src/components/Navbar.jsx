@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { Settings, LogOut, Moon, ChevronRight, HelpCircle, MessageCircle } from 'lucide-react'
+import { Settings, LogOut, Moon, ChevronRight, HelpCircle, MessageCircle, Compass } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export default function Navbar() {
@@ -45,7 +45,7 @@ export default function Navbar() {
                 <Link to="/" className="btn btn-ghost text-3xl font-black tracking-tighter text-primary">PiN</Link>
 
                 <div className="hidden md:flex gap-2 ml-4">
-                    <Link to="/feed" className="btn btn-ghost btn-sm">Community</Link>
+
                     <Link to="/photographers" className="btn btn-ghost btn-sm">Find Photographers</Link>
                     {user && (
                         (user.role === 'photographer' || user.user_metadata?.role === 'photographer') ? (
@@ -65,9 +65,14 @@ export default function Navbar() {
                 ) : (
                     <div className="flex items-center gap-2">
                         {user && (
-                            <Link to="/inbox" className="btn btn-ghost btn-circle">
-                                <MessageCircle size={24} />
-                            </Link>
+                            <>
+                                <Link to="/feed" className="btn btn-ghost btn-circle" title="Community Feed">
+                                    <Compass size={24} />
+                                </Link>
+                                <Link to="/inbox" className="btn btn-ghost btn-circle" title="Inbox">
+                                    <MessageCircle size={24} />
+                                </Link>
+                            </>
                         )}
                         <div className="dropdown dropdown-end">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
@@ -75,6 +80,7 @@ export default function Navbar() {
                                     <img
                                         src={profile?.avatar_url || user.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
                                         alt="User"
+                                        className="avatar-img"
                                     />
                                 </div>
                             </div>
@@ -90,6 +96,7 @@ export default function Navbar() {
                                                 <img
                                                     src={profile?.avatar_url || user.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
                                                     alt="User"
+                                                    className="avatar-img"
                                                 />
                                             </div>
                                         </div>

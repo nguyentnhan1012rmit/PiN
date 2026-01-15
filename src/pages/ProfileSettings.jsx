@@ -246,7 +246,7 @@ export default function ProfileSettings() {
                                     onClick={() => avatarInputRef.current.click()}
                                 >
                                     {formData.avatar_url ? (
-                                        <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                        <img src={formData.avatar_url} alt="Avatar" className="avatar-img" />
                                     ) : (
                                         <div className="w-full h-full bg-neutral text-neutral-content flex items-center justify-center text-3xl font-bold">
                                             {formData.full_name?.[0]}

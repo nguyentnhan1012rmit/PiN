@@ -86,7 +86,7 @@ export default function MyBookings() {
                                     <div className="avatar placeholder">
                                         <div className="w-12 rounded-full bg-neutral text-neutral-content">
                                             {booking.photographer?.avatar_url ?
-                                                <img src={booking.photographer.avatar_url} /> :
+                                                <img src={booking.photographer.avatar_url} alt={booking.photographer.full_name} className="avatar-img" /> :
                                                 <span>{booking.photographer?.full_name?.[0]}</span>
                                             }
                                         </div>
