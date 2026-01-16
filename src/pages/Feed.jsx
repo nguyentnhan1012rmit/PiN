@@ -29,7 +29,7 @@ export default function Feed() {
             // 3. Fetch profiles for those users
             const { data: profilesData, error: profilesError } = await supabase
                 .from('profiles')
-                .select('id, full_name, avatar_url')
+                .select('id, full_name, avatar_url, role')
                 .in('id', userIds)
 
             if (profilesError) {
@@ -55,8 +55,23 @@ export default function Feed() {
     }, [])
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchPosts()
+
+        // Realtime Subscription for Posts and Profiles
+        const channel = supabase
+            .channel('public:feed')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+                fetchPosts()
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+                // If a profile changes (e.g. role update), refresh the feed to show new badge
+                fetchPosts()
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
     }, [fetchPosts])
 
     return (

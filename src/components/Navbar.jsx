@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabaseClient'
-import { Settings, LogOut, Moon, Sun, ChevronRight, HelpCircle, MessageCircle, Compass } from 'lucide-react'
+import { Settings, LogOut, Moon, Sun, ChevronRight, HelpCircle, MessageCircle, Compass, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import RoleBadge from './RoleBadge'
 
 export default function Navbar() {
     const { user, signOut } = useAuth()
@@ -48,11 +49,15 @@ export default function Navbar() {
 
                     <Link to="/photographers" className="btn btn-ghost btn-sm">Find Photographers</Link>
                     {user && (
-                        (user.role === 'photographer' || user.user_metadata?.role === 'photographer') ? (
-                            <Link to="/dashboard" className="btn btn-ghost btn-sm">Dashboard</Link>
-                        ) : (
+                        <>
+                            {/* Dashboard: Visible to Photographers and Admins */}
+                            {(user.role === 'photographer' || user.user_metadata?.role === 'photographer' || user.role === 'admin' || user.user_metadata?.role === 'admin') && (
+                                <Link to="/dashboard" className="btn btn-ghost btn-sm">Dashboard</Link>
+                            )}
+
+                            {/* My Bookings: Visible to Everyone */}
                             <Link to="/my-bookings" className="btn btn-ghost btn-sm">My Bookings</Link>
-                        )
+                        </>
                     )}
                 </div>
             </div>
@@ -87,7 +92,7 @@ export default function Navbar() {
                                     />
                                 </div>
                             </div>
-                            <div tabIndex={0} className="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content card-glass w-80 text-base-content border border-base-content/10">
+                            <div tabIndex={0} className="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content bg-base-100 w-80 text-base-content border border-base-content/10 rounded-box">
                                 {/* Profile Header */}
                                 <div className="p-2 mb-2">
                                     <Link
@@ -103,9 +108,19 @@ export default function Navbar() {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="flex flex-col min-w-0">
-                                            <span className="font-bold text-lg leading-tight truncate">{profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0]}</span>
+                                        <div className="flex flex-col min-w-0 gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-base leading-tight">
+                                                    {profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0]}
+                                                </span>
+                                            </div>
+
                                             <span className="text-xs opacity-50 font-medium truncate">@{profile?.username || user.user_metadata?.username || user.email?.split('@')[0]}</span>
+
+                                            {/* Full Role Label Restored Here */}
+                                            <div className="mt-1">
+                                                <RoleBadge role={profile?.role || user.user_metadata?.role} type="full" />
+                                            </div>
                                         </div>
                                     </Link>
                                     <div className="divider my-1 opacity-20"></div>
@@ -151,6 +166,14 @@ export default function Navbar() {
                                         </button>
                                     </li>
                                 </ul>
+
+                                {(profile?.role === 'admin' || user.user_metadata?.role === 'admin') && (
+                                    <div className="p-2 border-t border-base-content/10 bg-base-content/5">
+                                        <Link to="/admin" className="btn btn-ghost btn-sm w-full justify-start gap-3 text-error">
+                                            <Shield size={18} /> Admin Dashboard
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -159,4 +182,3 @@ export default function Navbar() {
         </div>
     )
 }
-

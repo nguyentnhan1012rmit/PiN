@@ -24,7 +24,8 @@ export default function AdminDashboard() {
     }, [])
 
     useEffect(() => {
-        if (!user || user.role !== 'admin') {
+        const isAdmin = user?.role === 'admin' || user?.user_metadata?.role === 'admin'
+        if (!user || !isAdmin) {
             toast.error("Unauthorized Access")
             navigate('/')
             return
@@ -34,20 +35,21 @@ export default function AdminDashboard() {
     }, [user, navigate, fetchUsers])
 
     const handleDeleteUser = async (id) => {
-        // Caution: Deleting from Auth is hard via client. We can only delete from public.profiles
-        // which might Cascade if configured, or just leave auth orphan.
-        // Real Admin delete usually requires Supabase Service Role Key (Backend).
-        // For client-side simulation, we'll try standard delete on profile.
-
         if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return
 
-        const { error } = await supabase.from('profiles').delete().eq('id', id)
+        const loadingToast = toast.loading("Deleting user...")
+
+        const { error } = await supabase.functions.invoke('delete-user', {
+            body: { user_id: id }
+        })
+
+        toast.dismiss(loadingToast)
 
         if (error) {
-            toast.error("Failed to delete user. (Requires Service Role usually)")
+            toast.error("Failed to delete user: " + error.message)
             console.error(error)
         } else {
-            toast.success("User profile deleted.")
+            toast.success("User deleted successfully.")
             fetchUsers()
         }
     }
@@ -83,7 +85,7 @@ export default function AdminDashboard() {
     return (
         <div className="container mx-auto p-4 py-8">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h1 className="text-3xl font-bold text-error">Super Admin Dashboard</h1>
+                <h1 className="text-3xl font-bold text-error">Admin Dashboard</h1>
                 <div className="relative w-full md:w-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50" size={18} />
                     <input

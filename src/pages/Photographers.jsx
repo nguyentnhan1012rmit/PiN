@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import RoleBadge from '../components/RoleBadge'
 import { MapPin, User, ArrowRight } from 'lucide-react'
 
 export default function Photographers() {
@@ -41,7 +42,7 @@ export default function Photographers() {
                                 <div className="absolute bottom-4 left-4 text-white">
                                     <h2 className="text-2xl font-bold flex items-center gap-2">
                                         {p.full_name || 'Unknown Photographer'}
-                                        <div className="badge badge-secondary badge-sm">Pro</div>
+                                        <RoleBadge role="photographer" type="mini" />
                                     </h2>
                                     {p.location && (
                                         <div className="flex items-center text-sm opacity-90 gap-1">

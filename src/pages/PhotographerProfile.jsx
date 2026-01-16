@@ -1,3 +1,4 @@
+import RoleBadge from '../components/RoleBadge'
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
@@ -314,7 +315,10 @@ export default function PhotographerProfile() {
                         <div className="flex-1 flex flex-col items-center md:items-start gap-4 mt-4">
                             <div className="flex flex-col md:flex-row items-center justify-between w-full gap-4">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-center md:text-left">{profile.full_name}</h1>
+                                    <div className="flex items-center justify-center md:justify-start gap-2">
+                                        <h1 className="text-3xl font-bold text-center md:text-left">{profile.full_name}</h1>
+                                        <RoleBadge role={profile.role} type="mini" />
+                                    </div>
                                     <p className="opacity-60 text-center md:text-left text-primary font-medium">@{profile.username || 'user'}</p>
                                 </div>
 

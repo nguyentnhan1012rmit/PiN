@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import CommentItem from './CommentItem'
+import RoleBadge from './RoleBadge'
 import { Link } from 'react-router-dom'
 
 export default function PostCard({ post, onDelete }) {
@@ -174,8 +175,9 @@ export default function PostCard({ post, onDelete }) {
                     </div>
                 </Link>
                 <div className="flex-1 min-w-0">
-                    <Link to={`/photographer/${post.user_id}`} className="font-bold text-base text-base-content hover:text-primary transition-colors block truncate">
+                    <Link to={`/photographer/${post.user_id}`} className="font-bold text-base text-base-content hover:text-primary transition-colors block truncate flex items-center gap-2">
                         {post.profiles?.full_name || 'Unknown User'}
+                        <RoleBadge role={post.profiles?.role} type="mini" />
                     </Link>
                     <div className="text-xs text-base-content/50">
                         {new Date(post.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}

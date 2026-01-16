@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabaseClient'
 import { ArrowRight } from 'lucide-react'
 
 export default function Login() {
@@ -15,12 +16,25 @@ export default function Login() {
         e.preventDefault()
         setLoading(true)
         setError(null)
-        const { error } = await signIn({ email, password })
+        const { data, error } = await signIn({ email, password })
         if (error) {
             setError(error.message)
             setLoading(false)
         } else {
-            navigate('/dashboard')
+            // Fetch role to decide redirect
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', data.user.id)
+                .single()
+
+            const role = profile?.role || data.user.user_metadata?.role || 'customer'
+
+            if (role === 'photographer') {
+                navigate('/dashboard')
+            } else {
+                navigate('/photographers')
+            }
         }
     }
 

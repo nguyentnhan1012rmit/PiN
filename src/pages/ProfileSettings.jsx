@@ -327,20 +327,23 @@ export default function ProfileSettings() {
 
 
                         {/* Optional: Role switching */}
-                        <div className="form-control bg-base-200 p-4 rounded-xl">
-                            <label className="label cursor-pointer justify-start gap-4">
-                                <span className="label-text font-bold">I am a Photographer</span>
-                                <input
-                                    type="checkbox"
-                                    className="toggle toggle-primary"
-                                    checked={formData.role === 'photographer'}
-                                    onChange={e => setFormData({ ...formData, role: e.target.checked ? 'photographer' : 'customer' })}
-                                />
-                            </label>
-                            <p className="text-xs opacity-70 mt-2">
-                                Switch this on to enable photographer features like Dashboard and Portfolio capabilities.
-                            </p>
-                        </div>
+                        {/* Optional: Role switching - Hide for Admins to prevent accidental downgrade */}
+                        {formData.role !== 'admin' && (
+                            <div className="form-control bg-base-200 p-4 rounded-xl">
+                                <label className="label cursor-pointer justify-start gap-4">
+                                    <span className="label-text font-bold">I am a Photographer</span>
+                                    <input
+                                        type="checkbox"
+                                        className="toggle toggle-primary"
+                                        checked={formData.role === 'photographer'}
+                                        onChange={e => setFormData({ ...formData, role: e.target.checked ? 'photographer' : 'customer' })}
+                                    />
+                                </label>
+                                <p className="text-xs opacity-70 mt-2">
+                                    Switch this on to enable photographer features like Dashboard and Portfolio capabilities.
+                                </p>
+                            </div>
+                        )}
 
                         <div className="card-actions justify-end mt-4">
                             <button type="submit" className="btn btn-primary" disabled={saving}>

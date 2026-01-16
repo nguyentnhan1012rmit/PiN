@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import ChatWindow from '../components/ChatWindow'
 import NewChatModal from '../components/NewChatModal'
 import { MessageSquare, Plus, Trash2 } from 'lucide-react'
+import RoleBadge from '../components/RoleBadge'
 import { useLocation } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 
@@ -106,7 +107,7 @@ export default function Inbox() {
         // 3. Fetch details for these users
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, full_name, avatar_url')
+            .select('id, full_name, avatar_url, role')
             .in('id', Array.from(userIds))
 
         // 4. Combine with latest message
@@ -247,7 +248,10 @@ export default function Inbox() {
                                                 </div>
                                             </div>
                                             <div className="flex-1 overflow-hidden">
-                                                <div className="font-bold truncate">{conv.full_name}</div>
+                                                <div className="font-bold truncate flex items-center gap-1">
+                                                    {conv.full_name}
+                                                    <RoleBadge role={conv.role} type="mini" />
+                                                </div>
                                                 <div className="text-xs opacity-70 truncate">{conv.lastMessage}</div>
                                             </div>
                                             <div className="text-[10px] opacity-50 whitespace-nowrap">
