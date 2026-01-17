@@ -19,13 +19,13 @@ export const AuthProvider = ({ children }) => {
                 // Create a promise for fetching profile
                 const fetchProfile = supabase
                     .from('profiles')
-                    .select('role')
+                    .select('role, avatar_url, full_name')
                     .eq('id', currentSession.user.id)
                     .maybeSingle();
 
-                // Create a timeout promise (e.g. 2000ms)
+                // Create a timeout promise (1500ms)
                 const timeoutPromise = new Promise((resolve) => {
-                    setTimeout(() => resolve({ timeout: true }), 2000);
+                    setTimeout(() => resolve({ timeout: true }), 1500);
                 });
 
                 // Race them
@@ -47,8 +47,16 @@ export const AuthProvider = ({ children }) => {
                     role = currentSession.user.user_metadata?.role || 'customer';
                 }
 
+                // Merge profile data
+                const profileData = result.data || {}
+
                 setUser({
                     ...currentSession.user,
+                    user_metadata: {
+                        ...currentSession.user.user_metadata,
+                        ...profileData // Overlay profile data onto metadata for compatibility
+                    },
+                    ...profileData, // Also available at top level
                     role: role
                 })
             } else {
@@ -65,13 +73,13 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         let mounted = true
 
-        // Safety timeout
+        // Safety timeout - extended to avoid false positives on slow networks
         const safetyTimeout = setTimeout(() => {
             if (mounted && loading) {
-                console.warn("Auth loading timed out, forcing render.")
+                console.info("Auth loading taking longer than expected, forcing render.")
                 setLoading(false)
             }
-        }, 5000)
+        }, 12000)
 
         // Get Initial Session
         supabase.auth.getSession().then(({ data: { session } }) => {

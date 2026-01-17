@@ -3,6 +3,7 @@ import { Image, Send, X, Crop } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import ImageCropper from './ImageCropper'
+import Avatar from './Avatar'
 import { toast } from 'react-hot-toast'
 
 export default function CreatePost({ onPostCreated }) {
@@ -117,14 +118,13 @@ export default function CreatePost({ onPostCreated }) {
     return (
         <div className="card-glass p-6 rounded-2xl mb-8 shadow-sm animate-appear">
             <form onSubmit={handleSubmit} className="flex gap-4 items-start">
-                <div className="avatar pt-1">
-                    <div className="w-12 h-12 rounded-full ring-2 ring-primary ring-offset-base-100 ring-offset-2">
-                        <img
-                            src={user.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
-                            className="avatar-img"
-                            alt="Me"
-                        />
-                    </div>
+                <div className="pt-1">
+                    <Avatar
+                        src={user.user_metadata?.avatar_url}
+                        alt={user.user_metadata?.full_name}
+                        size="md"
+                        className="ring-2 ring-primary ring-offset-base-100 ring-offset-2"
+                    />
                 </div>
 
                 <div className="flex-1">

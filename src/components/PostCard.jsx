@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Send, Edit2 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
@@ -28,16 +28,19 @@ export default function PostCard({ post, onDelete }) {
     } = useComments(post.id)
 
     // Check if user liked this post
-    useState(() => {
+    // Check if user liked this post
+    useEffect(() => {
+        let mounted = true
         if (user) {
             supabase.from('likes')
                 .select('*')
                 .match({ post_id: post.id, user_id: user.id })
-                .single()
+                .maybeSingle()
                 .then(({ data }) => {
-                    if (data) setLiked(true)
+                    if (mounted && data) setLiked(true)
                 })
         }
+        return () => { mounted = false }
     }, [user, post.id])
 
     const handleLike = async () => {

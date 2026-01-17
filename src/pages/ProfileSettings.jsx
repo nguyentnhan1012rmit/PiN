@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { Save, User, MapPin, Camera, X, ZoomIn, Image, Check, Mail } from 'lucide-react'
+import { Save, User, MapPin, Camera, X, ZoomIn, Image, Check, Mail, Move } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import ImageCropper from '../components/ImageCropper'
 
 export default function ProfileSettings() {
     const { user } = useAuth()
@@ -24,11 +25,7 @@ export default function ProfileSettings() {
     const coverInputRef = useRef(null)
     const [cropModalOpen, setCropModalOpen] = useState(false)
     const [imageToCrop, setImageToCrop] = useState(null)
-    const [cropScale, setCropScale] = useState(1)
-    const [cropPosition, setCropPosition] = useState({ x: 0, y: 0 })
-    const [isDragging, setIsDragging] = useState(false)
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-    const imageRef = useRef(null) // Ref for the image element in cropper
+    const [croppingField, setCroppingField] = useState(null) // 'avatar_url' or 'cover_photo_url'
 
     const fetchProfile = useCallback(async () => {
         setLoading(true)
@@ -63,20 +60,16 @@ export default function ProfileSettings() {
         const file = e.target.files[0]
         if (!file) return
 
-        if (type === 'avatar') {
-            // Open Cropper for Avatar
-            const reader = new FileReader()
-            reader.onload = () => {
-                setImageToCrop(reader.result)
-                setCropScale(1)
-                setCropPosition({ x: 0, y: 0 })
-                setCropModalOpen(true)
-            }
-            reader.readAsDataURL(file)
-        } else {
-            // Direct upload for Cover
-            handleImageUpload(file, 'cover_photo_url')
+        const reader = new FileReader()
+        reader.onload = () => {
+            setImageToCrop(reader.result)
+            setCroppingField(type === 'avatar' ? 'avatar_url' : 'cover_photo_url')
+            setCropModalOpen(true)
         }
+        reader.readAsDataURL(file)
+
+        // Reset input
+        e.target.value = ''
     }
 
     // --- Upload Logic ---
@@ -114,71 +107,19 @@ export default function ProfileSettings() {
         }
     }
 
-    // --- Crop Logic ---
-    const onMouseDown = (e) => {
-        setIsDragging(true)
-        setDragStart({ x: e.clientX - cropPosition.x, y: e.clientY - cropPosition.y })
-    }
-
-    const onMouseMove = (e) => {
-        if (isDragging) {
-            setCropPosition({
-                x: e.clientX - dragStart.x,
-                y: e.clientY - dragStart.y
-            })
+    const handleCropComplete = (croppedBlob) => {
+        if (croppingField) {
+            handleImageUpload(croppedBlob, croppingField)
         }
+        setCropModalOpen(false)
+        setImageToCrop(null)
+        setCroppingField(null)
     }
 
-    const onMouseUp = () => {
-        setIsDragging(false)
-    }
-
-    const handleSaveCrop = async () => {
-        if (!imageRef.current) return
-
-        // Canvas output size
-        const size = 300
-        const viewerSize = 256 // w-64 is 256px
-        const ratio = size / viewerSize
-
-        const canvas = document.createElement('canvas')
-        canvas.width = size
-        canvas.height = size
-        const ctx = canvas.getContext('2d')
-
-        // Fill background
-        ctx.fillStyle = '#FFFFFF'
-        ctx.fillRect(0, 0, size, size)
-
-        const img = imageRef.current
-        const naturalWidth = img.naturalWidth
-        const naturalHeight = img.naturalHeight
-
-        // Math:
-        // 1. Move to Center of Canvas
-        ctx.translate(size / 2, size / 2)
-
-        // 2. Apply User Pan (adjusted for scale ratio between viewer and canvas)
-        ctx.translate(cropPosition.x * ratio, cropPosition.y * ratio)
-
-        // 3. Apply User Zoom
-        ctx.scale(cropScale, cropScale)
-
-        // 4. Apply Base Scale
-        // In the viewer, the image is rendered with "max-width: none" which implies natural size, 
-        // BUT we need to map the "viewer pixels" to "canvas pixels".
-        // If 1px on screen = 1px in natural image (roughly), then we just scale by ratio.
-        const effectiveScale = ratio
-        ctx.scale(effectiveScale, effectiveScale)
-
-        ctx.translate(-naturalWidth / 2, -naturalHeight / 2)
-        ctx.drawImage(img, 0, 0)
-
-        canvas.toBlob((blob) => {
-            handleImageUpload(blob, 'avatar_url')
-            setCropModalOpen(false)
-            setImageToCrop(null)
-        }, 'image/png')
+    const handleCancelCrop = () => {
+        setCropModalOpen(false)
+        setImageToCrop(null)
+        setCroppingField(null)
     }
 
     const handleSubmit = async (e) => {
@@ -355,77 +296,15 @@ export default function ProfileSettings() {
                 </div>
             </div>
 
-            {/* Custom Crop Modal */}
+            {/* Image Cropper Modal */}
             {cropModalOpen && imageToCrop && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-base-100 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-appear">
-                        <div className="p-4 border-b border-base-200 flex justify-between items-center">
-                            <h3 className="font-bold text-lg">Edit Avatar</h3>
-                            <button onClick={() => setCropModalOpen(false)} className="btn btn-ghost btn-circle btn-sm">
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="p-6 flex flex-col items-center gap-6">
-                            {/* Mask & Image Container */}
-                            <div className="relative w-64 h-64 rounded-full border-4 border-primary/20 overflow-hidden cursor-move touch-none bg-base-300"
-                                onMouseDown={onMouseDown}
-                                onMouseMove={onMouseMove}
-                                onMouseUp={onMouseUp}
-                                onMouseLeave={onMouseUp}
-                            >
-                                <img
-                                    ref={imageRef}
-                                    src={imageToCrop}
-                                    alt="Crop Preview"
-                                    draggable={false}
-                                    style={{
-                                        transform: `translate(${cropPosition.x}px, ${cropPosition.y}px) scale(${cropScale})`,
-                                        transformOrigin: 'center',
-                                        maxWidth: 'none',
-                                        maxHeight: 'none',
-                                        // Initialize roughly centered? We rely on flex center of parent if we weren't absolute
-                                        // But here we translate from 0,0. 
-                                        // Let's use flex center on the parent div to center the <img> initially
-                                        position: 'absolute',
-                                        left: '50%',
-                                        top: '50%',
-                                        marginLeft: '-50%', // These negative margins with left/top 50% center the image anchor
-                                        marginTop: '-50%',
-                                        pointerEvents: 'none' // Let events pass to container
-                                    }}
-                                    className="transition-transform duration-75 ease-out"
-                                />
-                            </div>
-
-                            <p className="text-xs opacity-50 flex items-center gap-1">
-                                <Move size={14} /> Drag to position
-                            </p>
-
-                            {/* Zoom Control */}
-                            <div className="w-full flex items-center gap-4 px-4">
-                                <span className="text-xs font-bold">Zoom</span>
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="3"
-                                    step="0.1"
-                                    value={cropScale}
-                                    onChange={(e) => setCropScale(parseFloat(e.target.value))}
-                                    className="range range-primary range-xs"
-                                />
-                                <ZoomIn size={16} className="opacity-50" />
-                            </div>
-
-                            <div className="flex gap-2 w-full">
-                                <button className="btn btn-ghost flex-1" onClick={() => setCropModalOpen(false)}>Cancel</button>
-                                <button className="btn btn-primary flex-1" onClick={handleSaveCrop}>
-                                    Apply <Check size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ImageCropper
+                    imageSrc={imageToCrop}
+                    onCancel={handleCancelCrop}
+                    onCropComplete={handleCropComplete}
+                    isCircular={croppingField === 'avatar_url'}
+                    initialAspectRatio={croppingField === 'avatar_url' ? 1 : 16 / 9}
+                />
             )}
         </div>
     )
