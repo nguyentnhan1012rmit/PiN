@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import { Settings, LogOut, Moon, Sun, ChevronRight, HelpCircle, MessageCircle, Compass, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import RoleBadge from './RoleBadge'
+import Avatar from './Avatar'
 
 export default function Navbar() {
     const { user, signOut } = useAuth()
@@ -84,13 +85,11 @@ export default function Navbar() {
                         )}
                         <div className="dropdown dropdown-end">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                                <div className="w-10 rounded-full">
-                                    <img
-                                        src={profile?.avatar_url || user.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
-                                        alt="User"
-                                        className="avatar-img"
-                                    />
-                                </div>
+                                <Avatar
+                                    src={profile?.avatar_url || user.user_metadata?.avatar_url}
+                                    alt={profile?.full_name || user.user_metadata?.full_name || user.email}
+                                    size="md"
+                                />
                             </div>
                             <div tabIndex={0} className="mt-3 z-[1] p-2 shadow-2xl menu menu-sm dropdown-content bg-base-100 w-80 text-base-content border border-base-content/10 rounded-box">
                                 {/* Profile Header */}
@@ -99,15 +98,11 @@ export default function Navbar() {
                                         to={`/photographer/${user.id}`}
                                         className="flex items-center gap-3 p-2 hover:bg-base-content/5 rounded-lg transition-colors shadow-sm border border-base-content/5"
                                     >
-                                        <div className="avatar">
-                                            <div className="w-10 rounded-full">
-                                                <img
-                                                    src={profile?.avatar_url || user.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
-                                                    alt="User"
-                                                    className="avatar-img"
-                                                />
-                                            </div>
-                                        </div>
+                                        <Avatar
+                                            src={profile?.avatar_url || user.user_metadata?.avatar_url}
+                                            alt={profile?.full_name || user.user_metadata?.full_name || user.email}
+                                            size="md"
+                                        />
                                         <div className="flex flex-col min-w-0 gap-1">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-bold text-base leading-tight">

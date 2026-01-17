@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import PostCard from '../components/PostCard'
 import CreatePost from '../components/CreatePost'
+import PostSkeleton from '../components/skeletons/PostSkeleton'
+import EmptyState from '../components/EmptyState'
+import { Camera } from 'lucide-react'
 
 export default function Feed() {
     const [posts, setPosts] = useState([])
@@ -84,8 +87,10 @@ export default function Feed() {
                 <CreatePost onPostCreated={fetchPosts} />
 
                 {loading ? (
-                    <div className="flex justify-center p-12">
-                        <span className="loading loading-spinner loading-lg text-primary"></span>
+                    <div className="space-y-6">
+                        <PostSkeleton />
+                        <PostSkeleton />
+                        <PostSkeleton />
                     </div>
                 ) : (
                     <div className="space-y-0">
@@ -93,10 +98,11 @@ export default function Feed() {
                             <PostCard key={post.id} post={post} onDelete={fetchPosts} />
                         ))}
                         {posts.length === 0 && (
-                            <div className="text-center py-20 opacity-50 border-t border-base-content/10">
-                                <p className="text-xl font-light">No posts yet.</p>
-                                <p className="text-sm mt-2">Be the first to share something!</p>
-                            </div>
+                            <EmptyState
+                                icon={Camera}
+                                title="No posts yet"
+                                description="The community is quiet. Be the first to share your amazing shots!"
+                            />
                         )}
                     </div>
                 )}

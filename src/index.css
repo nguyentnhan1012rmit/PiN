@@ -84,4 +84,9 @@
     .card-glass {
         @apply glass-panel rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-white/10;
     }
+
+    /* Button Micro-interaction */
+    .btn-animate {
+        @apply active:scale-[0.97] transition-transform duration-100;
+    }
 }

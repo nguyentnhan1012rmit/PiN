@@ -4,17 +4,28 @@ import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import CommentItem from './CommentItem'
+import { useComments } from '../hooks/useComments'
 import RoleBadge from './RoleBadge'
+import Avatar from './Avatar'
+import EmptyState from './EmptyState'
 import { Link } from 'react-router-dom'
 
 export default function PostCard({ post, onDelete }) {
     const { user } = useAuth()
     const [liked, setLiked] = useState(false)
     const [likesCount, setLikesCount] = useState(post.likes_count || 0)
-    const [comments, setComments] = useState([])
     const [showComments, setShowComments] = useState(false)
     const [newComment, setNewComment] = useState('')
-    const [loadingComments, setLoadingComments] = useState(false)
+
+    // Use custom hook for comments
+    const {
+        comments,
+        loading: loadingComments,
+        fetchComments,
+        addComment,
+        deleteComment,
+        editComment
+    } = useComments(post.id)
 
     // Check if user liked this post
     useState(() => {
@@ -62,117 +73,42 @@ export default function PostCard({ post, onDelete }) {
         }
     }
 
-    const buildCommentTree = (flatComments) => {
-        const commentMap = {}
-        const roots = []
-
-        // First pass: create map
-        flatComments.forEach(c => {
-            commentMap[c.id] = { ...c, children: [] }
-        })
-
-        // Second pass: link children to parents
-        flatComments.forEach(c => {
-            if (c.parent_id) {
-                if (commentMap[c.parent_id]) {
-                    commentMap[c.parent_id].children.push(commentMap[c.id])
-                }
-            } else {
-                roots.push(commentMap[c.id])
-            }
-        })
-        return roots
-    }
-
     const toggleComments = async () => {
         if (!showComments) {
-            setLoadingComments(true)
             setShowComments(true)
             await fetchComments()
-            setLoadingComments(false)
         } else {
             setShowComments(false)
         }
     }
 
-    const fetchComments = async () => {
-        const { data } = await supabase
-            .from('comments')
-            .select('*, profiles(full_name, avatar_url)')
-            .eq('post_id', post.id)
-            .order('created_at', { ascending: true })
-        setComments(buildCommentTree(data || []))
-    }
-
     const handleAddComment = async (e) => {
         e.preventDefault()
         if (!newComment.trim()) return
-        await handleReply(null, newComment)
-        setNewComment('')
+
+        const success = await addComment(user?.id, newComment)
+        if (success) {
+            setNewComment('')
+        }
     }
 
     const handleReply = async (parentId, content) => {
-        if (!user) {
-            toast.error('Please login to reply')
-            return
-        }
-
-        const { error } = await supabase
-            .from('comments')
-            .insert({
-                post_id: post.id,
-                user_id: user.id,
-                parent_id: parentId,
-                content: content
-            })
-
-        if (error) {
-            toast.error('Failed to comment')
-        } else {
-            // Refresh comments
-            await fetchComments()
-            if (!parentId) {
-                // Optimistically update main count if root comment? 
-                // DB trigger handles real count, but we might want local feedback.
-                // For nested replies, they don't change the Post's total comment count usually? 
-                // Ah, our earlier sql trigger updates post comment count on ANY insert to comments table.
-                // So yes, we could increment locally.
-            }
-        }
+        await addComment(user?.id, content, parentId)
     }
 
-    const handleDeleteComment = async (commentId) => {
-        const { error } = await supabase.from('comments').delete().eq('id', commentId)
-        if (error) {
-            toast.error('Failed to delete comment')
-        } else {
-            await fetchComments()
-            toast.success('Comment deleted')
-        }
-    }
 
-    const handleEditComment = async (commentId, content) => {
-        const { error } = await supabase.from('comments').update({ content }).eq('id', commentId)
-        if (error) {
-            toast.error('Failed to update comment')
-        } else {
-            await fetchComments()
-            toast.success('Comment updated')
-        }
-    }
 
     return (
         <div className="card-glass p-6 rounded-2xl mb-6 transition-all hover:shadow-md group">
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <Link to={`/photographer/${post.user_id}`} className="avatar">
-                    <div className="w-10 h-10 rounded-full ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
-                        <img
-                            src={post.profiles?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
-                            className="avatar-img"
-                            alt={post.profiles?.full_name || 'User'}
-                        />
-                    </div>
+                <Link to={`/photographer/${post.user_id}`}>
+                    <Avatar
+                        src={post.profiles?.avatar_url}
+                        alt={post.profiles?.full_name}
+                        size="md"
+                        className="ring-2 ring-transparent group-hover:ring-primary/20 transition-all"
+                    />
                 </Link>
                 <div className="flex-1 min-w-0">
                     <Link to={`/photographer/${post.user_id}`} className="font-bold text-base text-base-content hover:text-primary transition-colors block truncate flex items-center gap-2">
@@ -248,13 +184,12 @@ export default function PostCard({ post, onDelete }) {
                     <div className="mt-4 bg-base-200/30 rounded-xl p-4 animate-fade-in border border-base-content/5">
                         {/* Input */}
                         <form onSubmit={handleAddComment} className="flex gap-3 items-center mb-6">
-                            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
-                                <img
-                                    src={user?.user_metadata?.avatar_url || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"}
-                                    className="avatar-img"
-                                    alt="Me"
-                                />
-                            </div>
+                            <Avatar
+                                src={user?.user_metadata?.avatar_url}
+                                alt={user?.user_metadata?.full_name}
+                                size="sm"
+                                className="shrink-0"
+                            />
                             <div className="relative flex-1">
                                 <input
                                     type="text"
@@ -283,12 +218,17 @@ export default function PostCard({ post, onDelete }) {
                                         key={comment.id}
                                         comment={comment}
                                         onReply={handleReply}
-                                        onDelete={handleDeleteComment}
-                                        onEdit={handleEditComment}
+                                        onDelete={deleteComment}
+                                        onEdit={editComment}
                                     />
                                 ))
                             ) : (
-                                <div className="text-center py-4 text-sm opacity-50 italic">No comments yet. Be the first to say something!</div>
+                                <EmptyState
+                                    icon={MessageCircle}
+                                    title="No comments yet"
+                                    description="Be the first to say something!"
+                                    className="py-8 bg-transparent border-0"
+                                />
                             )}
                         </div>
                     </div>
