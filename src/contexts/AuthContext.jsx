@@ -16,19 +16,40 @@ export const AuthProvider = ({ children }) => {
         try {
             if (currentSession?.user) {
                 // Try to preserve role or fetch it if missing
-                const { data: profile, error } = await supabase
+                // Create a promise for fetching profile
+                const fetchProfile = supabase
                     .from('profiles')
                     .select('role')
                     .eq('id', currentSession.user.id)
-                    .maybeSingle()
+                    .maybeSingle();
 
-                if (error && error.code !== 'PGRST116') {
-                    console.error("Error fetching profile:", error)
+                // Create a timeout promise (e.g. 2000ms)
+                const timeoutPromise = new Promise((resolve) => {
+                    setTimeout(() => resolve({ timeout: true }), 2000);
+                });
+
+                // Race them
+                const result = await Promise.race([fetchProfile, timeoutPromise]);
+
+                let role = 'customer'; // default
+
+                if (result.timeout) {
+                    console.warn("Profile fetch timed out, using fallback role.");
+                    // We can try to use metadata role if available
+                    role = currentSession.user.user_metadata?.role || 'customer';
+                } else if (result.error && result.error.code !== 'PGRST116') {
+                    console.error("Error fetching profile:", result.error);
+                    role = currentSession.user.user_metadata?.role || 'customer';
+                } else if (result.data) {
+                    role = result.data.role;
+                } else {
+                    // No profile found, use metadata or default
+                    role = currentSession.user.user_metadata?.role || 'customer';
                 }
 
                 setUser({
                     ...currentSession.user,
-                    role: profile?.role || currentSession.user.user_metadata?.role || 'customer'
+                    role: role
                 })
             } else {
                 setUser(null)
