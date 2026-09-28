@@ -5,6 +5,7 @@ import { Settings, LogOut, Moon, Sun, ChevronRight, HelpCircle, MessageCircle, C
 import { useState, useEffect } from 'react'
 import RoleBadge from './RoleBadge'
 import Avatar from './Avatar'
+import NotificationBell from './NotificationBell'
 
 export default function Navbar() {
     const { user, signOut } = useAuth()
@@ -83,6 +84,7 @@ export default function Navbar() {
                                 </Link>
                             </>
                         )}
+                        {user && <NotificationBell />}
                         <div className="dropdown dropdown-end">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                                 <Avatar
