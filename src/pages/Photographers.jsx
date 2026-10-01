@@ -2,14 +2,23 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import RoleBadge from '../components/RoleBadge'
+<<<<<<< Updated upstream
 import FilterSidebar from '../components/FilterSidebar'
 import { MapPin, User, ArrowRight, Star, Filter } from 'lucide-react'
+=======
+import { MapPin, User, ArrowRight, Search, X } from 'lucide-react'
+>>>>>>> Stashed changes
 
 export default function Photographers() {
     const navigate = useNavigate()
     const [photographers, setPhotographers] = useState([])
     const [loading, setLoading] = useState(true)
+<<<<<<< Updated upstream
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+=======
+    const [searchTerm, setSearchTerm] = useState('')
+    const navigate = useNavigate()
+>>>>>>> Stashed changes
 
     const [filters, setFilters] = useState({
         location: '',
@@ -85,6 +94,7 @@ export default function Photographers() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+<<<<<<< Updated upstream
     const applyFilters = (newFilters) => {
         setFilters(newFilters)
         fetchPhotographers(newFilters)
@@ -118,6 +128,62 @@ export default function Photographers() {
                     isOpen={isSidebarOpen}
                     setIsOpen={setIsSidebarOpen}
                 />
+=======
+    // Filter photographers based on search term
+    const filteredPhotographers = photographers.filter(p => {
+        const search = searchTerm.toLowerCase()
+        return (
+            p.full_name?.toLowerCase().includes(search) ||
+            p.location?.toLowerCase().includes(search) ||
+            p.bio?.toLowerCase().includes(search)
+        )
+    })
+
+    return (
+        <div className="container mx-auto p-4 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <h1 className="text-3xl font-bold">Professional Photographers</h1>
+
+                {/* Search Bar */}
+                <div className="relative w-full md:w-80">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" size={18} />
+                    <input
+                        type="text"
+                        className="input input-bordered w-full pl-10 pr-10"
+                        placeholder="Search by name, location..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Results count */}
+            {searchTerm && (
+                <div className="text-sm text-base-content/60 mb-4">
+                    Found {filteredPhotographers.length} photographer{filteredPhotographers.length !== 1 ? 's' : ''}
+                </div>
+            )}
+
+            {loading ? (
+                <div className="flex justify-center p-12">
+                    <span className="loading loading-spinner loading-lg text-primary"></span>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                    {filteredPhotographers.map(p => (
+                        <div key={p.id} className="group cursor-pointer" onClick={() => navigate(`/photographer/${p.id}`)}>
+                            <figure className="h-64 w-full bg-base-300 relative overflow-hidden rounded-xl mb-4 group-hover:brightness-110 transition-all">
+                                {/* Placeholder for cover image if we had one */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+>>>>>>> Stashed changes
 
                 {/* Results Grid */}
                 <div className="flex-1">
@@ -196,6 +262,7 @@ export default function Photographers() {
                                 </div>
                             ))}
 
+<<<<<<< Updated upstream
                             {photographers.length === 0 && (
                                 <div className="col-span-full text-center py-20 text-base-content/50 border-2 border-dashed border-base-content/10 rounded-xl">
                                     <Filter size={48} className="mx-auto mb-4 opacity-50" />
@@ -204,6 +271,31 @@ export default function Photographers() {
                                     <button onClick={resetFilters} className="btn btn-outline btn-sm">Clear Filters</button>
                                 </div>
                             )}
+=======
+                            <div>
+                                <p className="text-base-content/70 line-clamp-2 mb-3 h-12">
+                                    {p.bio || "No bio available yet."}
+                                </p>
+                                <button className="btn btn-link btn-sm p-0 text-primary no-underline hover:opacity-70 group-hover:translate-x-2 transition-transform">
+                                    View Profile <ArrowRight size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+
+                    {filteredPhotographers.length === 0 && !searchTerm && (
+                        <div className="col-span-full text-center py-20 text-base-content/40">
+                            <User size={48} className="mx-auto mb-4 opacity-50" />
+                            <h3 className="font-bold text-xl">No photographers have joined yet.</h3>
+>>>>>>> Stashed changes
+                        </div>
+                    )}
+
+                    {filteredPhotographers.length === 0 && searchTerm && (
+                        <div className="col-span-full text-center py-20 text-base-content/40">
+                            <Search size={48} className="mx-auto mb-4 opacity-50" />
+                            <h3 className="font-bold text-xl">No photographers found</h3>
+                            <p className="text-sm mt-2">Try a different search term</p>
                         </div>
                     )}
                 </div>

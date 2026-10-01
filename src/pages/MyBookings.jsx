@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
-import { Calendar, Clock, CheckCircle, XCircle, User } from 'lucide-react'
+import { Calendar, Clock, CheckCircle, XCircle, User, X } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 export default function MyBookings() {
     const { user } = useAuth()
@@ -63,6 +64,24 @@ export default function MyBookings() {
         }
     }
 
+    const handleCancelBooking = async (bookingId) => {
+        if (!confirm('Are you sure you want to cancel this booking?')) return
+
+        const { error } = await supabase
+            .from('bookings')
+            .update({ status: 'cancelled' })
+            .eq('id', bookingId)
+
+        if (error) {
+            toast.error('Failed to cancel booking')
+        } else {
+            toast.success('Booking cancelled')
+            setBookings(prev => prev.map(b =>
+                b.id === bookingId ? { ...b, status: 'cancelled' } : b
+            ))
+        }
+    }
+
     return (
         <div className="container mx-auto p-4 py-8">
             <h1 className="text-3xl font-bold mb-8">My Bookings</h1>
@@ -109,6 +128,15 @@ export default function MyBookings() {
                                             ${booking.service?.price}
                                         </div>
                                     </div>
+
+                                    {booking.status === 'pending' && (
+                                        <button
+                                            onClick={() => handleCancelBooking(booking.id)}
+                                            className="btn btn-ghost btn-sm text-error"
+                                        >
+                                            <X size={14} /> Cancel
+                                        </button>
+                                    )}
 
                                     <div className={`badge badge-lg gap-2 ${getStatusColor(booking.status)} bg-base-200 border-none`}>
                                         {getStatusIcon(booking.status)}

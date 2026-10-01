@@ -20,7 +20,7 @@ export default function ChatWindow({ recipientId, recipientName, recipientAvatar
         const { data, error } = await supabase
             .from('messages')
             .select('*')
-            .or(`and(sender_id.eq.${user.id},receiver_id.eq.${recipientId}),and(sender_id.eq.${recipientId}),and(sender_id.eq.${recipientId},receiver_id.eq.${user.id})`)
+            .or(`and(sender_id.eq.${user.id},receiver_id.eq.${recipientId}),and(sender_id.eq.${recipientId},receiver_id.eq.${user.id})`)
             .order('created_at', { ascending: true })
 
         if (error) console.error('Error fetching messages:', error)

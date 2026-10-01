@@ -215,8 +215,17 @@ export default function PhotographerDashboard() {
                                             </button>
                                         </>
                                     )}
+                                    {booking.status === 'confirmed' && (
+                                        <button
+                                            onClick={() => handleUpdateBooking(booking.id, 'completed')}
+                                            className="btn btn-info btn-sm text-white"
+                                        >
+                                            Mark Complete
+                                        </button>
+                                    )}
                                     <div className={`badge badge-outline ${booking.status === 'confirmed' ? 'badge-success' :
-                                        booking.status === 'cancelled' ? 'badge-error' : 'badge-ghost'
+                                        booking.status === 'completed' ? 'badge-info' :
+                                            booking.status === 'cancelled' ? 'badge-error' : 'badge-ghost'
                                         }`}>
                                         {booking.status.toUpperCase()}
                                     </div>
@@ -285,6 +294,23 @@ export default function PhotographerDashboard() {
                                     </div>
                                     <p className="text-sm opacity-70 my-2">{service.description}</p>
                                     <div className="card-actions justify-end">
+                                        <button
+                                            onClick={() => {
+                                                const newTitle = prompt('Edit title:', service.title)
+                                                if (newTitle && newTitle !== service.title) {
+                                                    supabase.from('services')
+                                                        .update({ title: newTitle })
+                                                        .eq('id', service.id)
+                                                        .then(() => {
+                                                            toast.success('Service updated')
+                                                            fetchData()
+                                                        })
+                                                }
+                                            }}
+                                            className="btn btn-ghost btn-xs"
+                                        >
+                                            <Edit2 size={14} /> Edit
+                                        </button>
                                         <button
                                             onClick={() => handleDeleteService(service.id)}
                                             className="btn btn-ghost btn-xs text-error"

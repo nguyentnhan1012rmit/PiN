@@ -79,6 +79,7 @@ export default function Navbar() {
                                 <Link to="/feed" className="btn btn-ghost btn-circle" title="Community Feed">
                                     <Compass size={24} />
                                 </Link>
+                                <NotificationBell />
                                 <Link to="/inbox" className="btn btn-ghost btn-circle" title="Inbox">
                                     <MessageCircle size={24} />
                                 </Link>

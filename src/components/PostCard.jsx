@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Send, Edit2 } from 'lucide-react'
+import { Heart, MessageCircle, Share2, MoreHorizontal, Trash2, Send, Edit2, X } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -10,12 +10,17 @@ import Avatar from './Avatar'
 import EmptyState from './EmptyState'
 import { Link } from 'react-router-dom'
 
-export default function PostCard({ post, onDelete }) {
+export default function PostCard({ post, onDelete, onUpdate }) {
     const { user } = useAuth()
     const [liked, setLiked] = useState(false)
     const [likesCount, setLikesCount] = useState(post.likes_count || 0)
     const [showComments, setShowComments] = useState(false)
     const [newComment, setNewComment] = useState('')
+
+    // Edit Post State
+    const [isEditing, setIsEditing] = useState(false)
+    const [editContent, setEditContent] = useState(post.content)
+    const [editLoading, setEditLoading] = useState(false)
 
     // Use custom hook for comments
     const {
@@ -99,6 +104,37 @@ export default function PostCard({ post, onDelete }) {
         await addComment(user?.id, content, parentId)
     }
 
+    // Edit Post Handler
+    const handleEdit = async () => {
+        if (!editContent.trim()) return
+        setEditLoading(true)
+
+        const { error } = await supabase
+            .from('posts')
+            .update({ content: editContent })
+            .eq('id', post.id)
+
+        if (error) {
+            toast.error('Failed to update post')
+        } else {
+            toast.success('Post updated!')
+            post.content = editContent // Update local state
+            setIsEditing(false)
+            if (onUpdate) onUpdate()
+        }
+        setEditLoading(false)
+    }
+
+    // Share Post Handler
+    const handleShare = async () => {
+        const postUrl = `${window.location.origin}/feed#post-${post.id}`
+        try {
+            await navigator.clipboard.writeText(postUrl)
+            toast.success('Link copied to clipboard!')
+        } catch (err) {
+            toast.error('Failed to copy link')
+        }
+    }
 
 
     return (
@@ -131,7 +167,7 @@ export default function PostCard({ post, onDelete }) {
                         {user && user.id === post.user_id ? (
                             <>
                                 <li>
-                                    <a onClick={() => toast("Edit feature coming soon!")}>
+                                    <a onClick={() => setIsEditing(true)}>
                                         <Edit2 size={16} /> Edit Post
                                     </a>
                                 </li>
@@ -175,7 +211,7 @@ export default function PostCard({ post, onDelete }) {
                         <span className="font-medium">{post.comments_count > 0 ? post.comments_count : 'Comment'}</span>
                     </button>
                     <button
-                        onClick={() => toast('Share feature under development 🛠️', { icon: '🚧' })}
+                        onClick={handleShare}
                         className="btn btn-ghost btn-sm gap-2 px-3 ml-auto rounded-full text-base-content/60 hover:bg-base-200"
                     >
                         <Share2 size={18} />
@@ -237,6 +273,46 @@ export default function PostCard({ post, onDelete }) {
                     </div>
                 )}
             </div>
+
+            {/* Edit Post Modal */}
+            {isEditing && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-base-100 rounded-2xl shadow-xl w-full max-w-lg border border-base-200">
+                        <div className="flex items-center justify-between p-4 border-b border-base-200">
+                            <h3 className="font-bold text-lg">Edit Post</h3>
+                            <button onClick={() => setIsEditing(false)} className="btn btn-ghost btn-sm btn-circle">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            <textarea
+                                className="textarea textarea-bordered w-full min-h-[150px] text-base"
+                                value={editContent}
+                                onChange={e => setEditContent(e.target.value)}
+                                placeholder="What's on your mind?"
+                            />
+                            {post.image_url && (
+                                <div className="mt-3">
+                                    <img src={post.image_url} alt="Post" className="rounded-lg max-h-48 object-cover" />
+                                    <p className="text-xs opacity-50 mt-1">Image cannot be changed</p>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-end gap-2 p-4 border-t border-base-200">
+                            <button onClick={() => setIsEditing(false)} className="btn btn-ghost">
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEdit}
+                                className="btn btn-primary"
+                                disabled={editLoading || !editContent.trim()}
+                            >
+                                {editLoading ? <span className="loading loading-spinner loading-sm"></span> : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
