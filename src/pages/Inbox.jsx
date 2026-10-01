@@ -166,9 +166,13 @@ export default function Inbox() {
         }
     }, [user, location.state, fetchConversations, subscribeToNewMessages])
 
-    // Use loading state
+    // Show loading spinner
     if (loading && conversations.length === 0) {
-        // Optional: could return a spinner here
+        return (
+            <div className="container mx-auto p-4 py-8 min-h-[80vh] flex items-center justify-center">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        )
     }
 
     const handleDeleteConversation = async () => {
